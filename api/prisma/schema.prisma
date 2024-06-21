@@ -22,35 +22,17 @@ model Usuarios{
   descripcion String @db.Text
   fecha_creacion DateTime @default(now())
   nombre String
-  //Relaciones
-  correos_enviados Correos[] @relation("correos_enviados")
-  correos_recibidos Correos[] @relation("correos_recibidos")
-}
-
-model Correos{
-  //Clave primaria
-  id Int @id @default(autoincrement())
-  //Claves foraneas
-  remitente Usuarios @relation(fields: [remitente_id], references: [id], "correos_enviados")
-  remitente_id Int
-  destinatario Usuarios @relation(fields: [destinatario_id], references: [id], "correos_recibidos")
-  destinatario_id Int
-  //Atributos
-  asunto String
-  cuerpo String @db.Text
-  fecha_envio DateTime @default(now())
-  leido Boolean @default(false)
-  es_favorito Boolean @default(false)
+  direcciones_bloqueadas Direcciones_Bloqueadas[]
+  direcciones_favoritas Direcciones_Favoritas[]
 }
 
 model Direcciones_Bloqueadas{
   //Clave primaria
   id Int @id @default(autoincrement())
-  //Claves foraneas
-  usuario_id Int
-  direccion_bloqueada  String
   //Atributos
-  fecha_bloqueo DateTime @default(now())
+  direccion_bloqueada  String
+  //Relaciones
+  usuarios_que_lo_bloquean Usuarios[]
 }
 
 model Direcciones_Favoritas{
@@ -58,8 +40,8 @@ model Direcciones_Favoritas{
   id Int @id @default(autoincrement())
   //Claves foraneas
   usuario_id Int
-  direccion_favorita String
   //Atributos
-  fecha_favorito DateTime @default(now())
-  categoria String
+  direccion_favorita String
+  //Relaciones
+  usuarios_que_hacen_favorito Usuarios[]
 }
