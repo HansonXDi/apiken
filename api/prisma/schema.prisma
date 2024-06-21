@@ -12,3 +12,54 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Usuarios{
+  //Clave primaria
+  id Int @id @default(autoincrement())
+  //Atributos
+  direccion_correo String @unique
+  contrasena String
+  descripcion String @db.Text
+  fecha_creacion DateTime @default(now())
+  nombre String
+  //Relaciones
+  correos_enviados Correos[] @relation("correos_enviados")
+  correos_recibidos Correos[] @relation("correos_recibidos")
+}
+
+model Correos{
+  //Clave primaria
+  id Int @id @default(autoincrement())
+  //Claves foraneas
+  remitente Usuarios @relation(fields: [remitente_id], references: [id], "correos_enviados")
+  remitente_id Int
+  destinatario Usuarios @relation(fields: [destinatario_id], references: [id], "correos_recibidos")
+  destinatario_id Int
+  //Atributos
+  asunto String
+  cuerpo String @db.Text
+  fecha_envio DateTime @default(now())
+  leido Boolean @default(false)
+  es_favorito Boolean @default(false)
+}
+
+model Direcciones_Bloqueadas{
+  //Clave primaria
+  id Int @id @default(autoincrement())
+  //Claves foraneas
+  usuario_id Int
+  direccion_bloqueada  String
+  //Atributos
+  fecha_bloqueo DateTime @default(now())
+}
+
+model Direcciones_Favoritas{
+  //Clave primaria
+  id Int @id @default(autoincrement())
+  //Claves foraneas
+  usuario_id Int
+  direccion_favorita String
+  //Atributos
+  fecha_favorito DateTime @default(now())
+  categoria String
+}
