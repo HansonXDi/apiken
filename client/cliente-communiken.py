@@ -1,74 +1,74 @@
 import requests
-URL="http://localhost:3000"
+URL="http://localhost:3000/api"
 
 def login(correo,contrasenia):
     data = {
         "correo": correo,
         "contrasenia": contrasenia
     }
-    response = requests.post(URL+"/login", json=data)
+    response = requests.post(URL+"/login",json=data)
     if response.status_code == 200:
-        print("Bienvenido ", response.json()["nombre"])
+        print("Bienvenido", response.json()["nombre"])
         return True
     else:
-        print("No se pudo iniciar sesion, intenta de nuevo/n")
+        print("No se pudo iniciar sesion, intenta de nuevo")
         return False
 
-print ("Correos ComuniKen/n")
+print("Correos ComuniKen")
 
 flag_inicio=False
-while flag_inicio:
+while not flag_inicio:
     print ("Correo: ")
     correo_sesion = input()
     print ("Contrasenia: ")
     contrasenia = input()
-    print ("Iniciando sesion/n")
+    print ("Iniciando sesion")
     flag_inicio=login(correo_sesion,contrasenia)
-#menu----------------------------------------------------------------------------------------------------------------
+#menu------------------------------------------------------------------------------------------------------------------
 flag=True
 while flag:
-    #opciones----------------------------------------------------------------------------------------------------------------
-    print("Que desea hacer?/n")
-    print ("1. buscar un usuario/n")
-    print ("2. marcar usuario como favorito/n")
-    print ("3. descamarcar usuario como favorito/n")
-    print ("4. ver lista de usuario marcados como favoritos/n")
-    print ("5. bloquear usuario/n")
-    print ("6. salir/n")
+    #opciones----------------------------------------------------------------------------------------------------------
+    print("Que desea hacer?")
+    print ("1. buscar un usuario")
+    print ("2. marcar usuario como favorito")
+    print ("3. descamarcar usuario como favorito")
+    print ("4. ver lista de usuario marcados como favoritos")
+    print ("5. bloquear usuario")
+    print ("6. salir")
     opcion = input()
-    #codigo de opciones----------------------------------------------------------------------------------------------------------------
+    #codigo de opciones-------------------------------------------------------------------------------------------------
     if opcion == "1":
-        print ("Ingrese el correo del usuario que desea buscar/n")
+        print ("Ingrese el correo del usuario que desea buscar")
         correo = input()
         data = {
             "correo": correo
         }
-        response = requests.post(URL+"/buscar_usuario", json=data)
-        if response.status_code == 200:
-            print("Usuario encontrado: ", response.json())
+        response = requests.get(URL+"/informacion",json=data)
+        if response.json()["estado"] == 200:
+            print("Usuario encontrado: \n nombre :", response.json()["nombre"],"\ncorreo :",response.json()["correo"],"\ndescripcion:",response.json()["descripcion"])
         else:
             print("se ha producido un error, detalles:", response.text)
     elif opcion == "2":
-        print ("Ingrese el correo del usuario que desea marcar como favorito/n")
+        print ("Ingrese el correo del usuario que desea marcar como favorito")
         correo = input()
         data = {
-            "correo_que_quiere_maracar": correo_sesion,
-            "correo_a_marcar": correo
+            "correo_marcado": correo,
+            "correo_marcador": correo_sesion
         }
         response = requests.post(URL+"/marcarcorreo", json=data)
-        if response.status_code == 200:
+        if response.json()["estado"] == 200:
             print("Usuario marcado como favorito")
         else:
             print("se ha producido un error, detalles:", response.text)
     elif opcion == "3":
-        print ("Ingrese el correo del usuario que desea descamarcar como favorito/n")
+        print ("Ingrese el correo del usuario que desea descamarcar como favorito")
         correo = input()
         data = {
-            "correo_que_quiere_desmarcar": correo_sesion,
-            "correo": correo
+            "correo_marcado": correo,
+            "correo_marcador": correo_sesion
         }
         response = requests.post(URL+"/desmarcarcorreo", json=data)
-        if response.status_code == 200:
+        if response.json()["estado"] == 200:
             print("Usuario descamarado como favorito")
         else:
             print("se ha producido un error,detalles", response.text)
@@ -78,18 +78,20 @@ while flag:
         }
 
         response = requests.get(URL+"/favoritos", json=data)
-        if response.status_code == 200:
+        if response.json()["estado"] == 200:
             print("Usuarios favoritos: ", response.json())
         else:
             print("se ha producido un error,detalles", response.text)
     elif opcion == "5":
-        print ("Ingrese el correo del usuario que desea bloquear/n")
+        print ("Ingrese el correo del usuario que desea bloquear")
+        
         correo = input()
         data = {
-            "correo": correo
+            "correo_marcado": correo,
+            "correo_marcador": correo_sesion
         }
         response = requests.post(URL+"/bloquear", json=data)
-        if response.status_code == 200:
+        if response.json()["estado"] == 200:
             print("Usuario bloqueado")
         else:
             print("se ha producido un error,detalles", response.json())

@@ -19,29 +19,38 @@ model Usuarios{
   //Atributos
   direccion_correo String @unique
   contrasena String
-  descripcion String @db.Text
+  descripcion String? @db.Text
   fecha_creacion DateTime @default(now())
   nombre String
-  direcciones_bloqueadas Direcciones_Bloqueadas[]
-  direcciones_favoritas Direcciones_Favoritas[]
+  //Relaciones con bloqueo
+  direcciones_bloqueadas Direcciones_Bloqueadas[] @relation("bloqueadores")
+  direcciones_que_me_han_bloqueado Direcciones_Bloqueadas[] @relation("bloqueados")
+  //Relaciones con favoritos
+  direcciones_favoritas Direcciones_Favoritas[] @relation("favoritadores")
+  direcciones_que_me_han_favoritado Direcciones_Favoritas[] @relation("favoritos")
+  
 }
 
 model Direcciones_Bloqueadas{
-  //Clave primaria
-  id Int @id @default(autoincrement())
+  //Clave primaria compuesta
+  @@id([usuario_bloqueadorId, usuario_bloqueadoId])
   //Atributos
   direccion_bloqueada  String
   //Relaciones
-  usuarios_que_lo_bloquean Usuarios[]
+  usuario_bloqueador Usuarios @relation("bloqueadores", fields: [usuario_bloqueadorId], references: [id])
+  usuario_bloqueadorId Int
+  usuario_bloqueado Usuarios @relation("bloqueados" ,fields: [usuario_bloqueadoId], references: [id])
+  usuario_bloqueadoId Int
 }
 
 model Direcciones_Favoritas{
-  //Clave primaria
-  id Int @id @default(autoincrement())
-  //Claves foraneas
-  usuario_id Int
+  //Clave primaria compuesta
+  @@id([usuario_favoritadorId, usuario_favoritadoId])
   //Atributos
   direccion_favorita String
   //Relaciones
-  usuarios_que_hacen_favorito Usuarios[]
+  usuario_favoritador Usuarios @relation("favoritadores", fields: [usuario_favoritadorId], references: [id])
+  usuario_favoritadorId Int
+  usuario_favoritado Usuarios @relation("favoritos", fields: [usuario_favoritadoId], references: [id])
+  usuario_favoritadoId Int
 }
