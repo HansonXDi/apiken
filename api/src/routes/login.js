@@ -3,47 +3,44 @@ import { Elysia } from "elysia";
 
 const prisma = new PrismaClient();
 export const login = new Elysia();
-
-login.post('/api/login', async (body) => {
+// Ruta para iniciar sesion
+login.get('/api/login', async ({ query }) => {
     console.log("Se ha recibido una peticion login");
-    if(!body){
+    console.log(query.direccion_correo);
+    console.log(query.contrasena);
+    // Verificar que se hayan enviado los datos necesarios y que no esten vacios
+    if(query.direccion_correo === undefined || query.contrasena === undefined){
       console.log("Error al iniciar sesion1");
-        return {
+      // Si no se envian los datos necesarios se retorna un error
+      return {
           "estado": 400,
-          "error": 'No se han ingresado datos'
-        }
-    }
-    const { correo, contrasena } = body;
-    console.log(correo);
-    console.log(contrasena);
-    if (!correo || !contrasena) {
-      console.log("Error al iniciar sesion2");
-        return {
-          "estado": 400,
-          "error": 'Falta la contraseña o el correo'
-        }
+          "error": "Falta agregar algun dato"
+      };
     }
     try {
+        // se busca el usuario en la base de datos
         const usuario = await prisma.usuarios.findUnique({
             where: {
-                direcion_correo: correo,
-                contrasena: contrasena
+                direccion_correo: query.direccion_correo,
+                contrasena: query.contrasena
             }
         });
         if (!usuario) {
-          console.log("Error al iniciar sesion3");
+          console.log("Usuario no ingresado");
+          // Si no se encuentra el usuario se retorna un error
             return {
               "estado": 404,
-              "error": 'Usuario no encontrado'
+              "error": 'No ingresó un usuario'
             }
         }
         console.log("Peticion del tipo login ha finalizado con exito");
         return {
           "estado": 200,
-          "mensaje": 'Sesion iniciada correctamente'
+          "mensaje": 'Sesion iniciada correctamente',
+          "nombre": usuario.nombre
         }
     } catch (error) {      
-        console.log("Error al iniciar sesion4");
+        console.log("Error al iniciar sesion");
         return {
           "estado": 500,
           "error": 'Error en el servidor'

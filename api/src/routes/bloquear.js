@@ -4,8 +4,9 @@ import { Elysia } from "elysia";
 const prisma = new PrismaClient();
 export const bloquear = new Elysia();
 
-bloquear.post('/api/bloquear', async (body) => {
+bloquear.post('/api/bloquear', async ({body}) => {
     console.log("se ha recibido una petición bloquear");
+    //Revisa si el body esta vacio
     if(!body){
         return {
           "estado": 400,
@@ -13,17 +14,22 @@ bloquear.post('/api/bloquear', async (body) => {
         }
     }
     const {correo_marcador, correo_marcado} = body;
+    console.log(correo_marcador);
+    console.log(correo_marcado);
+    //Revisa si el correo_marcador o el correo_marcado estan vacios
     if(!correo_marcador || !correo_marcado){
         return {
             "estado": 400,
             "error": 'Falta la contraseña o el correo'
         }
     }
+    //Busca al usuario que quiere bloquear
     const marcador = await prisma.usuarios.findUnique({
         where:{
             direccion_correo: correo_marcador
         }
     });
+    //Si el usuario no existe, se manda un error
     if(!marcador){
         console.log("Peticion del tipo bloquear fallida");
         return {
@@ -39,7 +45,6 @@ bloquear.post('/api/bloquear', async (body) => {
     if(!marcado){
         console.log("Peticion del tipo bloquear fallida");
         return {
-            
             "estado": 404,
             "error": 'El usuario a bloquear no existe'
         }
@@ -49,7 +54,8 @@ bloquear.post('/api/bloquear', async (body) => {
         await prisma.direcciones_Bloqueadas.create({
             data:{
                 usuario_bloqueadorId: marcador.id,
-                usuario_bloqueadoId: marcado.id
+                usuario_bloqueadoId: marcado.id,
+                direccion_bloqueada: marcado.direccion_correo
             }
         });
         console.log("Peticion del tipo bloquear ha finalizado con exito");
@@ -58,10 +64,10 @@ bloquear.post('/api/bloquear', async (body) => {
             "mensaje": 'Usuario bloqueado con éxito'
         }
     }catch(e){
-        console.log("Error al bloquear al usuario");
+        console.log("El usuario ya esta bloqueado");
         return {
             "estado": 500,
-            "error": 'Error al bloquear al usuario'
+            "error": 'El usuario ya esta bloqueado'
         }
         
     }

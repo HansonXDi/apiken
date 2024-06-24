@@ -3,39 +3,43 @@ import { Elysia } from "elysia";
 
 const prisma = new PrismaClient()
 export const verfavoritos = new Elysia({});
-
-verfavoritos.get('/api/verfavoritos', async ({body}) => {
+// Ruta para ver los favoritos de un usuario
+verfavoritos.get('/api/verfavoritos', async ({query}) => {
     console.log("se ha recibido una peticion verfavoritos");
-    if (!body) {
+    // Verifica que se haya ingresado una direccion de correo
+    if (query.direccion_correo === undefined) {
+        console.log("No se ingreso una direccion de correo");
         return {
             "estado": 400,
             "error": 'No se han ingresado datos' 
         };
     }
-    const { id } = body;
-    if (typeof id === 'undefined' || id === null || id === '') {
-        console.log("Peticion del tipo ver/favoritos ha fallado");
-        return {
-            "estado": 400,
-            "error": 'Falta la contraseña o el correo' 
-        };
-    }
+    // Busca al usuario en la base de datos
+    const usuario = await prisma.usuarios.findUnique({
+        where: {
+            direccion_correo: query.direccion_correo
+        }
+    });
     try {
-        const favoritos = await prisma.favoritos.findMany({
+        // Busca los favoritos del usuario
+        const favoritos = await prisma.direcciones_Favoritas.findMany({
             where: {
-                id_usuario: id
+                usuario_favoritadorId: usuario.id
             },
             select: {
-                direccion_correo: true,
+                usuario_favoritadoId: false,
+                direccion_favorita: true,
+                usuario_favoritador: false
             }
         });
-        console.log("Peticion del tipo ver/favoritos ha finalizada con exito")
+        console.log("Peticion del tipo ver/favoritos ha finalizado con exito")
         return {
             "estado": 200,
             "favoritos": favoritos
         };
     } catch (error) {
-        console.log("Peticion del tipo ver/favoritos ha fallado");
+        // En caso de que no se encuentren favoritos
+        console.log("Usuario no tiene favoritos");
         return {
             "estado": 400,
             "error": "Ha existido un error al buscar los favoritos"

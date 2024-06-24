@@ -1,0 +1,10 @@
+curl -fsSL https://bun.sh/install | bash
+bun install elysia
+sudo snap install node --classic
+npm install
+
+
+
+en power shell 
+powershell -c "irm bun.sh/install.ps1 | iex"
+bun install elysia
